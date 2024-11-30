@@ -2,23 +2,23 @@
 include('connection.php');
 session_start();
 // ถ้า user เข้าสู่ระบบแล้วและมีเซสชัน username
-if (isset($_SESSION['username'])) {
+if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
   // ตรวจสอบว่า permission เป็น 'user' หรือ 'admin'
-}
+  $username = $_SESSION['username'];
+  $permission = $_SESSION['permission'];
 
-// รับ username จาก URL
-if (isset($_GET['username'])) {
-  $username = mysqli_real_escape_string($con, $_GET['username']);
-
-  // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
+  if($permission != 'admin'){
+    header("Location: mainsystem.php");
+    exit;
+  }
   $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
   $user = mysqli_fetch_assoc($result);
-
   if (!$user) {
     die("User not found.");
   }
-} else {
-  die("Username is not specified.");
+}else{
+  header("Location: logout.php");
+    exit;
 }
 
 $itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
@@ -139,7 +139,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 <input type="submit" class="btn btn-success btnRegister w-100" value="ยืนยัน" />
               </div>
               <div class="col-md-12"> <!-- ปุ่มย้อนกลับอยู่ใต้ปุ่มยืนยัน -->
-                <a href="mainsystem.php?username=<?php echo urlencode($user['username']); ?>" class="btn btn-secondary w-100">ย้อนกลับ</a>
+                <a href="mainsystem.php" class="btn btn-secondary w-100">ย้อนกลับ</a>
               </div>
             </div>
           </div>

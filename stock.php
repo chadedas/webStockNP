@@ -1,3 +1,18 @@
+<?php
+include('connection.php'); // เชื่อมต่อกับฐานข้อมูล
+session_start(); // ใช้ session สำหรับตรวจสอบผู้ใช้ที่ล็อกอิน
+
+// ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
+if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
+    header("Location: index.php"); // หากไม่ได้ล็อกอิน ให้ไปหน้า login
+    exit;
+}
+
+// รับค่าชื่อผู้ใช้จาก session
+$username = $_SESSION['username'];
+?>
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>

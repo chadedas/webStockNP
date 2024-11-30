@@ -1,7 +1,9 @@
 <?php
 session_start();
 // ถ้า user เข้าสู่ระบบแล้วและมีเซสชัน username
-if (isset($_SESSION['username'])) {
+if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
+  header("Location: mainsystem.php");
+  exit;
   // ตรวจสอบว่า permission เป็น 'user' หรือ 'admin'
 }
 

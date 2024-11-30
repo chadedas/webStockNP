@@ -3,26 +3,14 @@ include('connection.php');
 session_start();
 
 // ถ้า user เข้าสู่ระบบแล้วและมีเซสชัน username
-if (isset($_SESSION['username'])) {
-  // ตรวจสอบว่า permission เป็น 'user' หรือ 'admin'
-  //if ($_SESSION['permission'] == 'user') {
-  //  header("Location: mainsystem.php?username=" . $_SESSION['username']);  // ส่งไปหน้า edituser_user.php
-  //  exit;
-  //}
-}
-
-if (isset($_GET['username'])) {
-  $username = mysqli_real_escape_string($con, $_GET['username']);
-
-  // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
+if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
+  $username = $_SESSION['username'];
+  $permission = $_SESSION['permission'];
   $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
   $user = mysqli_fetch_assoc($result);
-
-  if (!$user) {
-    die("User not found.");
-  }
-} else {
-  die("Username is not specified.");
+}else{
+  header("Location: logout.php");
+    exit;
 }
 
 // เริ่มต้นค่าการค้นหาเป็นค่าว่าง
@@ -170,33 +158,33 @@ body {
     <!-- Main Grid -->
     
     <main class="grid-container">
-    <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="importItem.php?username=<?php echo htmlspecialchars($user['username']); ?>">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">เอาของเข้า</p>
+  <?php if ($permission === 'admin'): ?>
+    <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="importItem.php">
+      <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+      <p class="fs-3 text-center">เอาของเข้า</p>
     </a>
-    <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="exportItem.php?username=<?php echo htmlspecialchars($user['username']); ?>">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">เอาของออก</p>
-</a>
-<a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="history.php">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">ประวัติการเอาเข้าออก</p>
-</a>
-<a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="stock.php">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">ดูของในสต็อก</p>
-</a>
-<a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white hide-item" href="dashbord.php">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">ซ่อน</p>
-</a>
-<a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white hide-item" href="dashbord.php">
-  <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
-  <p class="fs-3 text-center">ซ่อน</p>
-</a>
-
-    </main>
-
+    <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="exportItem.php">
+      <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+      <p class="fs-3 text-center">เอาของออก</p>
+    </a>
+    <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="addnewuser.php">
+    <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+    <p class="fs-3 text-center">เพิ่มผู้ใช้ใหม่</p>
+  </a>
+  <?php endif; ?>
+  <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="history.php">
+    <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+    <p class="fs-3 text-center">ประวัติการเอาเข้าออก</p>
+  </a>
+  <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white" href="stock.php">
+    <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+    <p class="fs-3 text-center">ดูของในสต็อก</p>
+  </a>
+  <a class="grid-item link-offset-2 link-underline link-underline-opacity-0 text-white hide-item" href="dashbord.php">
+    <img src="image/NPPP.png" alt="Dashboard" class="img-fluid">
+    <p class="fs-3 text-center">ซ่อน</p>
+  </a>
+</main>
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-icon active">

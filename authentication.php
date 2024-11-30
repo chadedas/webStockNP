@@ -2,6 +2,11 @@
 include('connection.php');  
 session_start();
 
+if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
+    header("Location: mainsystem.php"); // หากไม่ได้ล็อกอิน ให้ไปหน้า login
+    exit;
+}
+
 $username = $_POST['user'];  
 $password = $_POST['pass'];  
    
@@ -35,7 +40,7 @@ if ($row && password_verify($password, $row['password'])) {
                     timer: 1000,
                     timerProgressBar: true
                 }).then(function() {
-                    window.location = 'mainsystem.php?username=" . urlencode($username) . "'; // เปลี่ยนเส้นทางไปยังหน้า edituser
+                    window.location = 'mainsystem.php'; // เปลี่ยนเส้นทางไปยังหน้า edituser
                 });
             });
         </script>";
@@ -51,7 +56,7 @@ if ($row && password_verify($password, $row['password'])) {
                     timer: 1000,
                     timerProgressBar: true
                 }).then(function() {
-                    window.location = 'mainsystem.php?username=" . urlencode($username) . "'; // เปลี่ยนเส้นทางไปยังหน้า edituser
+                    window.location = 'mainsystem.php'; // เปลี่ยนเส้นทางไปยังหน้า edituser
                 });
             });
         </script>";

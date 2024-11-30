@@ -3,9 +3,17 @@ include('connection.php'); // เชื่อมต่อกับฐานข�
 session_start(); // ใช้ session สำหรับตรวจสอบผู้ใช้ที่ล็อกอิน
 
 // ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
     header("Location: index.php"); // หากไม่ได้ล็อกอิน ให้ไปหน้า login
     exit;
+}else{
+// ดึงชื่อผู้ใช้จาก session
+$username = $_SESSION['username'];
+$permission = $_SESSION['permission'];
+if($permission != 'admin'){
+    header("Location: mainsystem.php");
+    exit;
+  }
 }
 
 // เปิดการแสดงข้อผิดพลาด
@@ -19,22 +27,21 @@ if (!$con) {
 }
 
 // ตรวจสอบว่าฟอร์มกรอกข้อมูลครบถ้วนหรือไม่
-if (empty($_POST['firstname']) || empty($_POST['user']) || empty($_POST['item']) || empty($_POST['quantity']) || empty($_POST['date_added'])) {
+if (empty($_POST['firstname']) || empty($_POST['category']) || empty($_POST['user']) || empty($_POST['item']) || empty($_POST['quantity']) || empty($_POST['date_added'])) {
     die("Missing required fields. Please check the input form.");
 }
-
-// ดึงชื่อผู้ใช้จาก session
-$username = $_SESSION['username'];
 
 // รับค่าจากฟอร์ม
 $firstname = mysqli_real_escape_string($con, $_POST['firstname']);
 $user = mysqli_real_escape_string($con, $_POST['user']);
-$item = mysqli_real_escape_string($con, $_POST['item']);
+$category = mysqli_real_escape_string($con, $_POST['category']);
+$itemID = mysqli_real_escape_string($con, $_POST['item_id']);
+$item = mysqli_real_escape_string($con, $_POST['item_name']);
 $quantity = intval($_POST['quantity']); // แปลงเป็นจำนวนเต็ม
 $dateImport = mysqli_real_escape_string($con, $_POST['date_added']);
 
 // ตรวจสอบจำนวนสินค้าที่มีในสต็อก
-$query = "SELECT Amount FROM Stock_Main WHERE ItemName = '$item'";
+$query = "SELECT Amount FROM `$category` WHERE id = '$itemID'"; // ใช้ backticks สำหรับ table name
 $result = mysqli_query($con, $query);
 
 if (!$result) {
@@ -49,10 +56,10 @@ if (mysqli_num_rows($result) > 0) {
         $newAmount = $currentAmount + $quantity;
 
         // อัปเดตจำนวนในสต็อก
-        $updateQuery = "UPDATE Stock_Main SET Amount = '$newAmount' WHERE ItemName = '$item'";
-        if (!mysqli_query($con, $updateQuery)) {
-            die("Error in UPDATE query: " . mysqli_error($con));
-        }
+        $updateQuery = "UPDATE `$category` SET Amount = '$newAmount' WHERE id = '$itemID'"; // ใช้ backticks สำหรับ table name
+    if (!mysqli_query($con, $updateQuery)) {
+        die("Error in UPDATE query: " . mysqli_error($con));
+    }
 
         // บันทึกข้อมูลการนำออกใน Stock_Import
         $insertQuery = "INSERT INTO Stock_Import (username, user , ItemName, Amount, Date) 
@@ -87,22 +94,22 @@ if (mysqli_num_rows($result) > 0) {
                     // อัปเดตรูปภาพในฐานข้อมูล
                     $updateImageQuery = "UPDATE Stock_Import SET Image = '$imagePath' WHERE id = '$id'";
                     if (!mysqli_query($con, $updateImageQuery)) {
-                        header("Location: importItem.php?username=" . urlencode($username) . "&error=update_image_failed");
+                        header("Location: importItem.php" . "&error=update_image_failed");
                         exit;
                     }
                 } else {
-                    header("Location: importItem.php?username=" . urlencode($username) . "&error=upload_failed");
+                    header("Location: importItem.php" . "&error=upload_failed");
                     exit;
                 }
             }
         }
 
         // สำเร็จ
-        header("Location: importItem.php?username=" . urlencode($username) . "&success=item_added");
+        header("Location: importItem.php" . "&success=item_added");
         exit;
 } else {
     // ถ้าไม่พบสินค้าในฐานข้อมูล
-    header("Location: importItem.php?username=" . urlencode($username) . "&error=item_not_found");
+    header("Location: importItem.php" . "&error=item_not_found");
     exit;
 }
 ?>

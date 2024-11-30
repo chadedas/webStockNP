@@ -3,9 +3,17 @@ include('connection.php'); // เชื่อมต่อกับฐานข�
 session_start(); // ใช้ session สำหรับตรวจสอบผู้ใช้ที่ล็อกอิน
 
 // ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
     header("Location: index.php"); // หากไม่ได้ล็อกอิน ให้ไปหน้า login
     exit;
+}else{
+// ดึงชื่อผู้ใช้จาก session
+$username = $_SESSION['username'];
+$permission = $_SESSION['permission'];
+if($permission != 'admin'){
+    header("Location: mainsystem.php");
+    exit;
+  }
 }
 
 // เปิดการแสดงข้อผิดพลาด
@@ -23,8 +31,7 @@ if (empty($_POST['firstname']) || empty($_POST['user']) || empty($_POST['item'])
     die("Missing required fields. Please check the input form.");
 }
 
-// ดึงชื่อผู้ใช้จาก session
-$username = $_SESSION['username'];
+
 
 // รับค่าจากฟอร์ม
 $firstname = mysqli_real_escape_string($con, $_POST['firstname']);

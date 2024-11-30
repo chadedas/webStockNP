@@ -2,26 +2,26 @@
 include('connection.php');
 session_start();
 // ถ้า user เข้าสู่ระบบแล้วและมีเซสชัน username
-if (isset($_SESSION['username'])) {
+if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
   // ตรวจสอบว่า permission เป็น 'user' หรือ 'admin'
-}
+  $username = $_SESSION['username'];
+  $permission = $_SESSION['permission'];
 
-// รับ username จาก URL
-if (isset($_GET['username'])) {
-  $username = mysqli_real_escape_string($con, $_GET['username']);
-
-  // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
+  if ($permission != 'admin') {
+    header("Location: mainsystem.php");
+    exit;
+  }
   $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
   $user = mysqli_fetch_assoc($result);
-
   if (!$user) {
     die("User not found.");
   }
 } else {
-  die("Username is not specified.");
+  header("Location: logout.php");
+  exit;
 }
-$itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
 
+$itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 $success = isset($_GET['success']) ? $_GET['success'] : '';
 ?>
@@ -94,22 +94,22 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                   ?>
                 </select>
               </div>
-
               <div class="form-group">
-                <label for="item" class="form-label">ของที่นำเข้า</label>
-                <select name="item" id="item" class="form-control" required>
-                  <option value="" disabled selected>เลือกของที่จะนำเข้า</option> <!-- ค่า default -->
-                  <?php
-                  $itemQuery = mysqli_query($con, "SELECT ItemName FROM Stock_Main");
+                <label for="category" class="form-label">เลือกหมวดหมู่</label>
+                <select name="category" id="category" class="form-control" required>
+                  <option value="" disabled selected>เลือกหมวดหมู่</option>
+                  <option value="Stock_Main">ห้องประชุม</option>
+                  <option value="Stock_Main2">ห้องสแปร์ (บนชั้น)</option>
+                  <option value="Stock_Main2_inroom">ห้องสแปร์ (นอกชั้น)</option>
+                  <option value="Stock_Main2_Study">ชุดสำหรับอบรม</option>
+                  <option value="Stock_Main4_VR">ชุดวีอา VR</option>
+                </select>
 
-                  if (mysqli_num_rows($itemQuery) > 0) {
-                    while ($item = mysqli_fetch_assoc($itemQuery)) {
-                      echo "<option value='" . $item['ItemName'] . "'>" . $item['ItemName'] . "</option>";
-                    }
-                  } else {
-                    echo "<option value=''>ไม่มีของในสต็อก</option>";
-                  }
-                  ?>
+              </div>
+              <div class="form-group">
+                <label for="item" class="form-label">เลือกของที่จะนำเข้า</label>
+                <select name="item" id="item" class="form-control" required>
+                  <option value="" disabled selected>เลือกของที่จะนำเข้า</option>
                 </select>
               </div>
 
@@ -124,6 +124,8 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                   ?>
                 </select>
               </div>
+              <input type="hidden" name="item_id" id="item_id" value="">
+              <input type="hidden" name="item_name" id="item_name" value="">
               <div class="form-group">
                 <label for="image" class="form-label">แนบรูปภาพประกอบ</label>
                 <input type="file" name="image" id="image" class="form-control" required />
@@ -138,7 +140,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 <input type="submit" class="btn btn-success btnRegister w-100" value="ยืนยัน" />
               </div>
               <div class="col-md-12"> <!-- ปุ่มย้อนกลับอยู่ใต้ปุ่มยืนยัน -->
-                <a href="mainsystem.php?username=<?php echo urlencode($user['username']); ?>" class="btn btn-secondary w-100">ย้อนกลับ</a>
+                <a href="mainsystem.php" class="btn btn-secondary w-100">ย้อนกลับ</a>
               </div>
             </div>
           </div>
@@ -149,12 +151,96 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    function redirectToChangePassword() {
-      const username = '<?php echo htmlspecialchars($user['username']); ?>';
-      window.location.href = `editpassword_user.php?username=${username}`; // Corrected by adding backticks
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
+      const categorySelect = document.getElementById('category');
+      const itemSelect = document.getElementById('item');
+
+      categorySelect.addEventListener('change', function() {
+        const selectedCategory = categorySelect.value;
+
+        if (selectedCategory) {
+          fetch(`getItemQuantity.php?category=${selectedCategory}`)
+            .then(response => response.json())
+            .then(data => {
+              itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
+
+              if (data.error) {
+                console.error(data.error);
+                alert('เกิดข้อผิดพลาด: ' + data.error);
+              } else {
+                data.forEach(item => {
+                  const option = document.createElement('option');
+                  option.value = item.id; // กำหนดให้ value ของ option เป็น id
+                  option.textContent = `${item.id} - ${item.ItemName}`;
+                  itemSelect.appendChild(option);
+                });
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching items:', error);
+              alert('ไม่สามารถดึงข้อมูลสินค้าได้');
+            });
+        }
+      });
+
+      itemSelect.addEventListener('change', function() {
+        const selectedItem = itemSelect.selectedOptions[0];
+        const selectedCategory = categorySelect.value;
+        let categoryName = '';
+        switch (selectedCategory) {
+
+          case 'Stock_Main':
+            categoryName = 'ห้องประชุม';
+            break;
+          case 'Stock_Main2':
+            categoryName = 'ห้องสแปร์ (บนชั้น)';
+            break;
+          case 'Stock_Main2_inroom':
+            categoryName = 'ห้องสแปร์ (ในห้อง)';
+            break;
+          case 'Stock_Main2_Study':
+            categoryName = 'ห้องสแปร์ (ในห้อง)';
+            break;
+          case 'ชุดวีอา VR':
+            categoryName = 'ห้องประชุม';
+            break;
+            // เพิ่มกรณีอื่นๆ ที่ต้องการ
+          default:
+            categoryName = 'ไม่ทราบ';
+        }
+
+        if (selectedItem) {
+          const itemId = selectedItem.value;
+          const itemName = selectedItem.textContent.split(' - ')[1];
+
+          // Make an AJAX call to get the item's details
+          fetch(`getItemDetails.php?id=${itemId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data) {
+                Swal.fire({
+                  title: `รายละเอียดของ ${itemName}`,
+                  html: `
+              <table class="table">
+                <tr><th>เก็บในห้อง</th><td>${categoryName}</td></tr>
+                <tr><th>นำไปเก็บที่</th><td>${data.whereItem}</td></tr>
+                <tr><th>ชื่อของ</th><td>${data.ItemName}</td></tr>
+              </table>
+            `,
+                  showClass: {
+                    popup: `animate__animated animate__fadeInUp animate__faster`
+                  },
+                  hideClass: {
+                    popup: `animate__animated animate__fadeOutDown animate__faster`
+                  }
+                });
+              } else {
+                alert('ข้อมูลไม่พบ');
+              }
+            })
+            .catch(error => console.error('Error fetching item details:', error));
+        }
+      });
       <?php if ($success == 'item_added'): ?>
         Swal.fire({
           title: 'นำของเข้าสต็อกสำเร็จ',
@@ -163,7 +249,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
           timer: 1000,
           timerProgressBar: true
         }).then(function() {
-          window.location = 'mainsystem.php?username=' + encodeURIComponent('<?php echo htmlspecialchars($user['username']); ?>');
+          window.location = 'mainsystem.php';
         });
       <?php endif; ?>
     });
