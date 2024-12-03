@@ -68,7 +68,6 @@ $username = $_SESSION['username'];
                     <option value="Stock_Main4_VR">ชุดวีอา VR</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary mt-3">ค้นหา</button>
         </form>
 
         <!-- แสดงตารางที่ค้นหา -->

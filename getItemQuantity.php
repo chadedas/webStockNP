@@ -48,4 +48,5 @@ if (isset($_GET['category'])) {
 } else {
   echo json_encode(['error' => 'No category specified']);
 }
+
 ?>

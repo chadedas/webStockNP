@@ -6,14 +6,14 @@ session_start(); // ใช้ session สำหรับตรวจสอบผ
 if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
     header("Location: index.php"); // หากไม่ได้ล็อกอิน ให้ไปหน้า login
     exit;
-}else{
-// ดึงชื่อผู้ใช้จาก session
-$username = $_SESSION['username'];
-$permission = $_SESSION['permission'];
-if($permission != 'admin'){
-    header("Location: mainsystem.php");
-    exit;
-  }
+} else {
+    // ดึงชื่อผู้ใช้จาก session
+    $username = $_SESSION['username'];
+    $permission = $_SESSION['permission'];
+    if ($permission != 'admin') {
+        header("Location: mainsystem.php");
+        exit;
+    }
 }
 
 // เปิดการแสดงข้อผิดพลาด
@@ -27,25 +27,28 @@ if (!$con) {
 }
 
 // ตรวจสอบว่าฟอร์มกรอกข้อมูลครบถ้วนหรือไม่
-if (empty($_POST['firstname']) || empty($_POST['user']) || empty($_POST['item']) || empty($_POST['quantity']) || empty($_POST['date_added'])) {
+if (empty($_POST['firstname']) || empty($_POST['category']) || empty($_POST['user']) || empty($_POST['item']) || empty($_POST['quantity']) || empty($_POST['date_added'])) {
     die("Missing required fields. Please check the input form.");
 }
-
-
 
 // รับค่าจากฟอร์ม
 $firstname = mysqli_real_escape_string($con, $_POST['firstname']);
 $user = mysqli_real_escape_string($con, $_POST['user']);
-$item = mysqli_real_escape_string($con, $_POST['item']);
+$category = mysqli_real_escape_string($con, $_POST['category']);
+$itemID = mysqli_real_escape_string($con, $_POST['item_id']);
+$item = mysqli_real_escape_string($con, $_POST['item_name']);
 $quantity = intval($_POST['quantity']); // แปลงเป็นจำนวนเต็ม
-$dateExport = mysqli_real_escape_string($con, $_POST['date_added']);
+$dateImport = mysqli_real_escape_string($con, $_POST['date_added']);
 
 // ตรวจสอบจำนวนสินค้าที่มีในสต็อก
-$query = "SELECT Amount FROM Stock_Main WHERE ItemName = '$item'";
+$query = "SELECT Amount FROM `$category` WHERE id = '$itemID'"; // ใช้ backticks สำหรับ table name
 $result = mysqli_query($con, $query);
 
+// เพิ่มการดีบัก Query และผลลัพธ์
 if (!$result) {
-    die("Error in SELECT query: " . mysqli_error($con));
+    echo "DEBUG: Query Error - " . mysqli_error($con) . "<br>";
+    echo "DEBUG: Query - $query<br>";
+    exit;
 }
 
 // ตรวจสอบว่าพบสินค้าในสต็อกหรือไม่
@@ -53,70 +56,68 @@ if (mysqli_num_rows($result) > 0) {
     $row = mysqli_fetch_assoc($result);
     $currentAmount = $row['Amount'];
 
-    // ตรวจสอบว่าสินค้าในสต็อกเพียงพอหรือไม่
-    if ($currentAmount >= $quantity) {
-        $newAmount = $currentAmount - $quantity;
+    $newAmount = $currentAmount - $quantity;
 
-        // อัปเดตจำนวนในสต็อก
-        $updateQuery = "UPDATE Stock_Main SET Amount = '$newAmount' WHERE ItemName = '$item'";
-        if (!mysqli_query($con, $updateQuery)) {
-            die("Error in UPDATE query: " . mysqli_error($con));
-        }
-
-        // บันทึกข้อมูลการนำออกใน Stock_Export
-        $insertQuery = "INSERT INTO Stock_Export (username, user, ItemName, Amount, Date) 
-                        VALUES ('$username', '$user', '$item', '$quantity', '$dateExport')";
-        if (!mysqli_query($con, $insertQuery)) {
-            die("Error in INSERT query: " . mysqli_error($con));
-        }
-
-        // จัดการอัพโหลดรูปภาพ
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $imageName = $_FILES['image']['name'];
-            $imageTmpName = $_FILES['image']['tmp_name'];
-            $imageSize = $_FILES['image']['size'];
-            $imageType = $_FILES['image']['type'];
-
-            // ตรวจสอบประเภทไฟล์
-            $allowedTypes = [
-                'image/jpeg', 'image/png', 'image/gif', // รูปแบบทั่วไป
-                'image/bmp', 'image/webp',             // เพิ่มรูปแบบ BMP และ WebP
-                'image/svg+xml',                       // SVG
-                'image/tiff'                           // TIFF
-            ];
-            if (in_array($imageType, $allowedTypes) && $imageSize <= 5 * 1024 * 1024) {
-                $id = mysqli_insert_id($con); // ดึง ID ที่เพิ่งเพิ่มล่าสุด
-                $imageNewName = $id . '_' . $username . '_' . $item . '_' . $quantity . '_' . $dateExport . '.' . pathinfo($imageName, PATHINFO_EXTENSION);
-                $uploadDir = 'historys/export/';
-                $uploadPath = $uploadDir . $imageNewName;
-
-                if (move_uploaded_file($imageTmpName, $uploadPath)) {
-                    $imagePath = $uploadPath;
-
-                    // อัปเดตรูปภาพในฐานข้อมูล
-                    $updateImageQuery = "UPDATE Stock_Export SET Image = '$imagePath' WHERE id = '$id'";
-                    if (!mysqli_query($con, $updateImageQuery)) {
-                        header("Location: exportItem.php?username=" . urlencode($username) . "&error=update_image_failed");
-                        exit;
-                    }
-                } else {
-                    header("Location: exportItem.php?username=" . urlencode($username) . "&error=upload_failed");
-                    exit;
-                }
-            }
-        }
-
-        // สำเร็จ
-        header("Location: exportItem.php?username=" . urlencode($username) . "&success=item_removed");
-        exit;
-    } else {
-        // ถ้าสินค้าในสต็อกไม่เพียงพอ
-        header("Location: exportItem.php?username=" . urlencode($username) . "&error=not_enough_stock");
+    // อัปเดตจำนวนในสต็อก
+    $updateQuery = "UPDATE `$category` SET Amount = '$newAmount' WHERE id = '$itemID'";
+    if (!mysqli_query($con, $updateQuery)) {
+        echo "DEBUG: Update Error - " . mysqli_error($con) . "<br>";
+        echo "DEBUG: Update Query - $updateQuery<br>";
         exit;
     }
+
+    // บันทึกข้อมูลการนำออกใน Stock_Export
+    $insertQuery = "INSERT INTO Stock_Export (username, user , ItemName, Amount, Date) 
+                    VALUES ('$username', '$user' , '$item', '$quantity', '$dateImport')";
+    if (!mysqli_query($con, $insertQuery)) {
+        echo "DEBUG: Insert Error - " . mysqli_error($con) . "<br>";
+        echo "DEBUG: Insert Query - $insertQuery<br>";
+        exit;
+    }
+
+    // จัดการอัพโหลดรูปภาพ
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $imageName = $_FILES['image']['name'];
+        $imageTmpName = $_FILES['image']['tmp_name'];
+        $imageSize = $_FILES['image']['size'];
+        $imageType = $_FILES['image']['type'];
+
+        // ตรวจสอบประเภทไฟล์
+        $allowedTypes = [
+            'image/jpeg', 'image/png', 'image/gif',
+            'image/bmp', 'image/webp', 'image/svg+xml', 'image/tiff'
+        ];
+        if (in_array($imageType, $allowedTypes) && $imageSize <= 5 * 1024 * 1024) {
+            $id = mysqli_insert_id($con);
+            $imageNewName = $id . '_' . $username . '_' . $item . '_' . $quantity . '_' . $dateImport . '.' . pathinfo($imageName, PATHINFO_EXTENSION);
+            $uploadDir = 'historys/export/';
+            $uploadPath = $uploadDir . $imageNewName;
+
+            if (move_uploaded_file($imageTmpName, $uploadPath)) {
+                $imagePath = $uploadPath;
+                $updateImageQuery = "UPDATE Stock_Export SET Image = '$imagePath' WHERE id = '$id'";
+                if (!mysqli_query($con, $updateImageQuery)) {
+                    echo "DEBUG: Image Update Error - " . mysqli_error($con) . "<br>";
+                    exit;
+                }
+            } else {
+                echo "DEBUG: Image Upload Failed<br>";
+                exit;
+            }
+        } else {
+            echo "DEBUG: Invalid Image Type or Size<br>";
+            exit;
+        }
+    }
+
+    // สำเร็จ
+    echo "DEBUG: Item successfully added.<br>";
+    echo "DEBUG: Redirecting to exportItem.php<br>";
+    header("Location: exportItem.php?success=item_added");
+    exit;
 } else {
-    // ถ้าไม่พบสินค้าในฐานข้อมูล
-    header("Location: exportItem.php?username=" . urlencode($username) . "&error=item_not_found");
+    echo "DEBUG: Item not found in category $category with id $itemID<br>";
+    echo "DEBUG: Query - $query<br>";
     exit;
 }
 ?>

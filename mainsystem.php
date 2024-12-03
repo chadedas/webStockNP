@@ -4,24 +4,27 @@ session_start();
 
 // ถ้า user เข้าสู่ระบบแล้วและมีเซสชัน username
 if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
-  $username = $_SESSION['username'];
-  $permission = $_SESSION['permission'];
-  $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
-  $user = mysqli_fetch_assoc($result);
-}else{
-  header("Location: logout.php");
+    $username = $_SESSION['username'];
+    $permission = $_SESSION['permission'];
+    $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
+    $user = mysqli_fetch_assoc($result);
+} else {
+    header("Location: logout.php");
     exit;
 }
 
 // เริ่มต้นค่าการค้นหาเป็นค่าว่าง
 $search = '';
 if (isset($_GET['search'])) {
-  $search = mysqli_real_escape_string($con, $_GET['search']);  // ป้องกันการโจมตี SQL Injection
+    $search = mysqli_real_escape_string($con, $_GET['search']);  // ป้องกันการโจมตี SQL Injection
 }
 ?>
 <html lang="en" data-bs-theme="dark">
 
 <head>
+
+
+
     <script src="/docs/5.3/assets/js/color-modes.js"></script>
 
     <meta charset="utf-8">
@@ -30,7 +33,7 @@ if (isset($_GET['search'])) {
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.122.0">
     <title>Stock N.P. Robotics</title>
-    <link rel="icon" type="image/x-icon" href="image/NPPP.ico">
+    <link rel="icon" type="image/icon" href="image/NPPP.ico">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/album/">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -38,24 +41,37 @@ if (isset($_GET['search'])) {
     <link href="/docs/5.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
+<!-- mangifie -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="N.P. Robotics">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
     <!-- Favicons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="apple-touch-icon" href="/docs/5.3/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="apple-touch-icon" href="image/NPPP-192x192.png">
+    
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
     <link rel="manifest" href="/docs/5.3/assets/img/favicons/manifest.json">
     <link rel="mask-icon" href="/docs/5.3/assets/img/favicons/safari-pinned-tab.svg" color="#712cf9">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500&display=swap" rel="stylesheet">
     <meta name="theme-color" content="#712cf9">
 
 
     <style>
-        a{
+        body {
+            font-family: 'Kanit', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        a {
             text-decoration: none;
         }
-        .grid-item:hover {
-            background-color: #555;
-        }
+
+
+
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -134,36 +150,54 @@ if (isset($_GET['search'])) {
         .bd-mode-toggle .dropdown-menu .active .bi {
             display: block !important;
         }
+
+        .grid-item:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background-color: #555;
+        }
+
         .grid-item img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: auto;
-}
+            transition: transform 0.3s ease;
+            width: 100%;
+            height: auto;
+        }
 
-@media (max-width: 767.98px) {
-    .grid-item {
-        text-align: center;
-    }
+        .grid-item:hover img {
+            transform: scale(1);
+        }
 
-    .card-body {
-        padding: 10px;
-    }
+        .grid-item p {
+            transition: color 0.3s ease;
+            margin: 0;
+        }
 
-    .grid-item img {
-        width: 80%;
-        height: auto;
-    }
+        .grid-item:hover p {
+            color: #ffc107;
+            /* เปลี่ยนสีข้อความ */
+        }
 
-.navbar {
-    transition: background-color 0.3s ease;
-}
+        @media (max-width: 767.98px) {
+            .grid-item {
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border-radius: 10px;
+                overflow: hidden;
+                /* ป้องกันส่วนเกิน */
+            }
 
-.sticky-top {
-    z-index: 1030;
-}
+            .card-body {
+                padding: 10px;
+            }
 
-}
+            .navbar {
+                transition: background-color 0.3s ease;
+            }
+
+            .sticky-top {
+                z-index: 1030;
+            }
+
+        }
     </style>
 
 
@@ -195,41 +229,41 @@ if (isset($_GET['search'])) {
     </svg>
 
     <header class="sticky-top">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-        <div class="container-fluid">
-            <a href="mainsystem.php" class="navbar-brand d-flex align-items-center">
-                <img src="image/NPPP.png" alt="N.P. Robotics Logo" width="40" height="40" class="me-2">
-                <strong>Stock N.P. Robotics</strong>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="exportItem.php">เอาของเข้า</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="importItem.php">เอาของออก</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="addnewuser.php">เพิ่มผู้ใช้ใหม่</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="history.php">ประวัติ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="stock.php">สต็อก</a>
-                    </li>
-                </ul>
-                <span class="navbar-text me-3 text-white">
-                    <?php echo htmlspecialchars($user['firstname'] . ' ' . $user['surname']); ?>
-                </span>
-                <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+                <a href="mainsystem.php" class="navbar-brand d-flex align-items-center">
+                    <img src="image/NPPP.png" alt="N.P. Robotics Logo" width="40" height="40" class="me-2">
+                    <strong>Stock N.P. Robotics</strong>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="importItem.php">เอาของเข้า</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="exportItem.php">เอาของออก</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="addnewuser.php">เพิ่มผู้ใช้ใหม่</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="history.php">ประวัติ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="stock.php">สต็อก</a>
+                        </li>
+                    </ul>
+                    <span class="navbar-text me-3 text-white">
+                        <?php echo htmlspecialchars($user['firstname'] . ' ' . $user['surname']); ?>
+                    </span>
+                    <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
+                </div>
             </div>
-        </div>
-    </nav>
-</header>
+        </nav>
+    </header>
 
 
 
@@ -240,83 +274,84 @@ if (isset($_GET['search'])) {
 
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
                     <div class="col text-center mx-auto">
-                        <a  href="exportItem.php">
-                        <div class="card shadow-sm grid-item">
-                            <svg class="grid-item bd-placeholder-img card-img-top " width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <image  href="image/in-stock.png" width="100%" height="100%" />
-                            </svg>
-                            <div class="grid-item card-body border-top border-secondary shadow bg-success bg-opacity-75">
-                                <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เอาของเข้า</p>
+                        <a href="importItem.php">
+                            <div class="card shadow-sm grid-item">
+                                <svg class="bd-placeholder-img card-img-top " width="100%" height="225"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <image href="image/in-stock.png" width="100%" height="100%" />
+                                </svg>
+                                <div class="card-body border-top border-secondary shadow bg-success bg-opacity-75">
+                                    <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เอาของเข้า</p>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+                    
+
+                    <div class="col text-center mx-auto">
+                        <a href="exportItem.php">
+                            <div class="card shadow-sm grid-item">
+                                <svg class="bd-placeholder-img card-img-top " width="100%" height="225"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <image href="image/out-of-stock.png" width="100%" height="100%" />
+                                </svg>
+                                <div class="card-body border-top border-secondary shadow bg-danger bg-opacity-75">
+                                    <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เอาของออก</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
 
                     <div class="col text-center mx-auto">
-                        <a  href="importItem.php">
-                        <div class="card shadow-sm grid-item">
-                            <svg class="grid-item bd-placeholder-img card-img-top " width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <image href="image/out-of-stock.png" width="100%" height="100%" />
-                            </svg>
-                            <div class="grid-item card-body border-top border-secondary shadow bg-danger bg-opacity-75">
-                                <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เอาของออก</p>
+                        <a href="addnewuser.php">
+                            <div class="card shadow-sm grid-item">
+                                <svg class=" bd-placeholder-img card-img-top " width="100%" height="225"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <image href="image/add-user.png" width="100%" height="100%" />
+                                </svg>
+                                <div class="card-body border-top border-secondary shadow bg-primary bg-opacity-75">
+                                    <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เพิ่มผู้ใช้ใหม่</p>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
                     </div>
 
                     <div class="col text-center mx-auto">
-                        <a  href="addnewuser.php">
-                        <div class="card shadow-sm grid-item">
-                            <svg class="grid-item bd-placeholder-img card-img-top " width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <image href="image/add-user.png" width="100%" height="100%" />
-                            </svg>
-                            <div class="grid-item card-body border-top border-secondary shadow bg-primary bg-opacity-75">
-                                <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">เพิ่มผู้ใช้ใหม่</p>
+                        <a href="history.php">
+                            <div class="card shadow-sm grid-item">
+                                <svg class="bd-placeholder-img card-img-top " width="100%" height="225"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <image href="image/sheets.png" width="100%" height="100%" />
+                                </svg>
+                                <div class="card-body border-top border-secondary shadow bg-secondary bg-opacity-75">
+                                    <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">ประวัติการเอาเข้าออก</p>
+                                </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
                     </div>
 
                     <div class="col text-center mx-auto">
-                        <a  href="history.php">
-                        <div class="card shadow-sm grid-item">
-                            <svg class="grid-item bd-placeholder-img card-img-top " width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <image href="image/sheets.png" width="100%" height="100%" />
-                            </svg>
-                            <div class="grid-item card-body border-top border-secondary shadow bg-secondary bg-opacity-75">
-                                <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">ประวัติการเอาเข้าออก</p>
+                        <a href="stock.php">
+                            <div class="card shadow-sm grid-item">
+                                <svg class="bd-placeholder-img card-img-top " width="100%" height="225"
+                                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                                    <title>Placeholder</title>
+                                    <image href="image/stock.png" width="100%" height="100%" />
+                                </svg>
+                                <div class="card-body border-top border-secondary shadow bg-opacity-75">
+                                    <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">ดูของในสต็อก</p>
+                                </div>
                             </div>
-                        </div>
-                    </a>
-                    </div>
-
-                    <div class="col text-center mx-auto">
-                        <a  href="stock.php">
-                        <div class="card shadow-sm grid-item">
-                            <svg class="grid-item bd-placeholder-img card-img-top " width="100%" height="225"
-                                xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                                preserveAspectRatio="xMidYMid slice" focusable="false">
-                                <title>Placeholder</title>
-                                <image href="image/stock.png" width="100%" height="100%" />
-                            </svg>
-                            <div class="grid-item card-body border-top border-secondary shadow bg-opacity-75">
-                                <p class="card-text fs-5 link-offset-2 link-underline link-underline-opacity-0">ดูของในสต็อก</p>
-                            </div>
-                        </div>
-                    </a>
+                        </a>
                     </div>
 
                 </div>
@@ -338,68 +373,68 @@ if (isset($_GET['search'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-        <script>
-            document.querySelectorAll('[data-bs-theme-value]').forEach(item => {
-                item.addEventListener('click', function () {
-                    const theme = this.getAttribute('data-bs-theme-value');
-                    document.documentElement.setAttribute('data-bs-theme', theme);
-        
-                    document.querySelectorAll('[data-bs-theme-value]').forEach(btn => {
-                        btn.classList.remove('active');
-                        btn.setAttribute('aria-pressed', 'false');
-                    });
-        
-                    this.classList.add('active');
-                    this.setAttribute('aria-pressed', 'true');
+    <script>
+        document.querySelectorAll('[data-bs-theme-value]').forEach(item => {
+            item.addEventListener('click', function() {
+                const theme = this.getAttribute('data-bs-theme-value');
+                document.documentElement.setAttribute('data-bs-theme', theme);
+
+                document.querySelectorAll('[data-bs-theme-value]').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
                 });
+
+                this.classList.add('active');
+                this.setAttribute('aria-pressed', 'true');
             });
-        </script>
-<script>
-  // เมื่อผู้ใช้พิมพ์ในช่องค้นหา
-  document.getElementById('search').addEventListener('keyup', function () {
-    var searchQuery = this.value.trim(); // เอาค่าที่พิมพ์ออกจากช่องค้นหามา
-    fetchData(searchQuery);
-  });
+        });
+    </script>
+    <script>
+        // เมื่อผู้ใช้พิมพ์ในช่องค้นหา
+        document.getElementById('search').addEventListener('keyup', function() {
+            var searchQuery = this.value.trim(); // เอาค่าที่พิมพ์ออกจากช่องค้นหามา
+            fetchData(searchQuery);
+        });
 
-  // โหลดข้อมูลทั้งหมดเมื่อหน้าเว็บโหลด
-  window.addEventListener('load', function () {
-    var searchQuery = document.getElementById('search').value.trim();
-    fetchData(searchQuery);
-  });
+        // โหลดข้อมูลทั้งหมดเมื่อหน้าเว็บโหลด
+        window.addEventListener('load', function() {
+            var searchQuery = document.getElementById('search').value.trim();
+            fetchData(searchQuery);
+        });
 
-  // ฟังก์ชัน fetch ข้อมูล
-  function fetchData(query) {
-    fetch('search.php?search=' + encodeURIComponent(query))
-      .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.text(); // รับข้อมูลเป็นข้อความ
-      })
-      .then(data => {
-        document.getElementById('table-body').innerHTML = data;
-        attachClickEvent(); // เพิ่ม Event Listener ให้ div ใหม่
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        document.getElementById('table-body').innerHTML =
-          '<tr><td colspan="100%">ไม่สามารถโหลดข้อมูลได้</td></tr>';
-      });
-  }
+        // ฟังก์ชัน fetch ข้อมูล
+        function fetchData(query) {
+            fetch('search.php?search=' + encodeURIComponent(query))
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text(); // รับข้อมูลเป็นข้อความ
+                })
+                .then(data => {
+                    document.getElementById('table-body').innerHTML = data;
+                    attachClickEvent(); // เพิ่ม Event Listener ให้ div ใหม่
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('table-body').innerHTML =
+                        '<tr><td colspan="100%">ไม่สามารถโหลดข้อมูลได้</td></tr>';
+                });
+        }
 
-  // เพิ่ม Event Listener ให้กับ div ทุกตัวที่มี class clickable-item
-  function attachClickEvent() {
-    document.querySelectorAll('.clickable-item').forEach(item => {
-      item.removeEventListener('click', handleClick); // ลบ Event เดิมก่อน (ถ้ามี)
-      item.addEventListener('click', handleClick);
-    });
-  }
+        // เพิ่ม Event Listener ให้กับ div ทุกตัวที่มี class clickable-item
+        function attachClickEvent() {
+            document.querySelectorAll('.clickable-item').forEach(item => {
+                item.removeEventListener('click', handleClick); // ลบ Event เดิมก่อน (ถ้ามี)
+                item.addEventListener('click', handleClick);
+            });
+        }
 
-  function handleClick() {
-    const targetHref = this.getAttribute('data-href');
-    if (targetHref) {
-      window.location.href = targetHref; // เปลี่ยนหน้าไปยังลิงก์ที่กำหนด
-    }
-  }
-</script>
+        function handleClick() {
+            const targetHref = this.getAttribute('data-href');
+            if (targetHref) {
+                window.location.href = targetHref; // เปลี่ยนหน้าไปยังลิงก์ที่กำหนด
+            }
+        }
+    </script>
 
 </body>
 

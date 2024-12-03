@@ -7,7 +7,7 @@ if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
   $username = $_SESSION['username'];
   $permission = $_SESSION['permission'];
 
-  if($permission != 'admin'){
+  if ($permission != 'admin') {
     header("Location: mainsystem.php");
     exit;
   }
@@ -16,13 +16,12 @@ if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
   if (!$user) {
     die("User not found.");
   }
-}else{
+} else {
   header("Location: logout.php");
-    exit;
+  exit;
 }
 
 $itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
-
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 $success = isset($_GET['success']) ? $_GET['success'] : '';
 ?>
@@ -66,7 +65,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
         <p>สำหรับแสดงข้อมูลผู้ใช้โปรแกรมถอดประกอบ KR150</p>
       </div>
       <div class="col-md-9 register-right">
-        <h3 class="register-heading">นำของจากสต็อก</h3>
+        <h3 class="register-heading">กรอกฟอร์ม</h3>
         <form action="exportItem_backend.php" method="post" enctype="multipart/form-data">
           <div class="row register-form">
             <div class="col-md-6">
@@ -74,10 +73,11 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 <label for="firstname" class="form-label">โดยผู้ดูแลสต็อก</label>
                 <input type="text" name="firstname" id="firstname" class="form-control" value="<?php echo htmlspecialchars($user['firstname'] . ' ' . $user['surname']); ?>" readonly required />
               </div>
+
               <div class="form-group">
-                <label for="user" class="form-label">ผู้นำออก</label>
+                <label for="user" class="form-label">ผู้นำเข้า</label>
                 <select name="user" id="user" class="form-control" required>
-                  <option value="" disabled selected>เลือกชื่อผู้นำออก</option> <!-- ค่า default -->
+                  <option value="" disabled selected>เลือกชื่อผู้นำเข้า</option> <!-- ค่า default -->
                   <?php
                   // Query เพื่อดึงข้อมูล firstname และ surname
                   $nameQuery = mysqli_query($con, "SELECT firstname, surname, nickname FROM nameTable");
@@ -95,26 +95,21 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 </select>
               </div>
               <div class="form-group">
-                <label for="item" class="form-label">ของที่จะนำออก</label>
-                <select name="item" id="item" class="form-control" required onchange="updateQuantityOptions()">
-                  <option value="" disabled selected>เลือกของที่จะนำออก</option> <!-- ค่า default -->
-                  <?php
-                  $itemQuery = mysqli_query($con, "SELECT id, ItemName, Amount FROM Stock_Main");
+                <label for="category" class="form-label">เลือกหมวดหมู่</label>
+                <select name="category" id="category" class="form-control" required>
+                  <option value="" disabled selected>เลือกหมวดหมู่</option>
+                  <option value="Stock_Main">ห้องประชุม</option>
+                  <option value="Stock_Main2">ห้องสแปร์ (บนชั้น)</option>
+                  <option value="Stock_Main2_inroom">ห้องสแปร์ (นอกชั้น)</option>
+                  <option value="Stock_Main2_Study">ชุดสำหรับอบรม</option>
+                  <option value="Stock_Main4_VR">ชุดวีอา VR</option>
+                </select>
 
-                  if (mysqli_num_rows($itemQuery) > 0) {
-                    while ($item = mysqli_fetch_assoc($itemQuery)) {
-                      $disabled = $item['Amount'] <= 0 ? "disabled" : ""; // ตรวจสอบว่าจำนวน <= 0 หรือไม่
-                      $style = $item['Amount'] <= 0 ? "style='color: red;'" : ""; // เพิ่มสีแดงถ้า Amount <= 0
-                      $amountDisplay = $item['Amount'] <= 0 ? "(หมด)" : "(" . $item['Amount'] . ")"; // แสดง "(หมด)" หากจำนวน <= 0
-
-                      echo "<option value='" . $item['ItemName'] . "' $disabled $style>" . $item['ItemName'] . " $amountDisplay</option>";
-                    }
-                  } else {
-                    echo "<option value=''>ไม่มีของในสต็อก</option>";
-                  }
-                  ?>
-
-
+              </div>
+              <div class="form-group">
+                <label for="item" class="form-label">เลือกของที่จะนำเข้า</label>
+                <select name="item" id="item" class="form-control" required>
+                  <option value="" disabled selected>เลือกของที่จะนำเข้า</option>
                 </select>
               </div>
 
@@ -125,6 +120,8 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 </select>
               </div>
 
+              <input type="hidden" name="item_id" id="item_id" value="">
+              <input type="hidden" name="item_name" id="item_name" value="">
               <div class="form-group">
                 <label for="image" class="form-label">แนบรูปภาพประกอบ</label>
                 <input type="file" name="image" id="image" class="form-control" required />
@@ -149,73 +146,103 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    function updateQuantityOptions() {
-      const itemSelect = document.getElementById('item');
-      const quantitySelect = document.getElementById('quantity');
-      const itemName = itemSelect.value;
+document.addEventListener('DOMContentLoaded', function () {
+  const categorySelect = document.getElementById('category');
+  const itemSelect = document.getElementById('item');
+  const quantitySelect = document.getElementById('quantity');
+  let selectedCategory = ''; // เก็บค่า category ที่เลือก
+  let selectedItem = null; // เก็บค่า item ที่เลือก
 
-      // Clear previous options
-      quantitySelect.innerHTML = '<option value="" disabled selected>เลือกจำนวน</option>';
+  // เมื่อเลือกหมวดหมู่ (category)
+  categorySelect.addEventListener('change', function () {
+    selectedCategory = categorySelect.value;
 
-      if (itemName) {
-        // ส่งคำขอเพื่อดึงข้อมูลจำนวนจากฐานข้อมูล
-        fetch('getItemQuantity.php?item=' + itemName)
-          .then(response => {
-            console.log(response); // ตรวจสอบการตอบกลับจาก server
-            return response.json();
-          })
-          .then(data => {
-            console.log(data); // ตรวจสอบข้อมูลที่ได้รับ
-            if (Array.isArray(data) && data.length > 0) {
-              data.forEach(quantity => {
-                const option = document.createElement('option');
-                option.value = quantity;
-                option.textContent = quantity;
-                quantitySelect.appendChild(option);
-              });
-            } else {
+    if (selectedCategory) {
+      fetch(`getItemQuantity.php?category=${selectedCategory}`)
+        .then(response => response.json())
+        .then(data => {
+          itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
+
+          if (data.error) {
+            console.error(data.error);
+            alert('เกิดข้อผิดพลาด: ' + data.error);
+          } else {
+            data.forEach(item => {
               const option = document.createElement('option');
-              option.value = "";
-              option.textContent = "ไม่มีจำนวนในสต็อก";
+              option.value = item.id; // กำหนดให้ value ของ option เป็น id
+              option.textContent = `${item.id} - ${item.ItemName}`;
+              itemSelect.appendChild(option);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching items:', error);
+          alert('ไม่สามารถดึงข้อมูลสินค้าได้');
+        });
+    }
+  });
+
+  // เมื่อเลือกสินค้า (item)
+  itemSelect.addEventListener('change', function () {
+    selectedItem = itemSelect.selectedOptions[0]; // เก็บข้อมูล item ที่เลือก
+    if (selectedItem) {
+      updateQuantityOptions(); // เรียกฟังก์ชันเมื่อมีการเปลี่ยน item
+    }
+  });
+
+  // ฟังก์ชันสำหรับอัปเดต dropdown จำนวน
+  function updateQuantityOptions() {
+    if (selectedItem && selectedCategory) {
+      const itemId = selectedItem.value; // ใช้ ID ของสินค้า
+      const itemName = selectedItem.textContent.split(' - ')[1]; // แยกชื่อสินค้าออกจาก text
+      quantitySelect.innerHTML = '<option value="" disabled selected>เลือกจำนวน</option>'; // ล้าง dropdown
+
+      // ส่งคำขอไปยัง getItemQuantity_Export.php พร้อมข้อมูลที่จำเป็น
+      const url = `getItemQuantity_Export.php?category=${encodeURIComponent(selectedCategory)}&item_id=${encodeURIComponent(itemId)}&item=${encodeURIComponent(itemName)}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            // เพิ่มตัวเลือกจำนวนใน dropdown
+            data.forEach(quantity => {
+              const option = document.createElement('option');
+              option.value = quantity;
+              option.textContent = quantity;
               quantitySelect.appendChild(option);
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching quantity:', error);
+            });
+          } else if (data.error) {
+            // แสดงข้อความข้อผิดพลาดใน dropdown
             const option = document.createElement('option');
             option.value = "";
-            option.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
+            option.textContent = data.error;
+            option.disabled = true; // ทำให้ไม่สามารถเลือกได้
+            option.style.color = "red"; // ตั้งค่าสีข้อความเป็นสีแดง
             quantitySelect.appendChild(option);
-          });
-      }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching quantity:', error);
+          const option = document.createElement('option');
+          option.value = "";
+          option.textContent = "เกิดข้อผิดพลาดในการดึงข้อมูล";
+          quantitySelect.appendChild(option);
+        });
     }
+  }
+});
+document.getElementById('item').addEventListener('change', function () {
+    const selectedOption = this.selectedOptions[0];
+    const itemId = selectedOption ? selectedOption.value : ''; // ตรวจสอบว่ามีค่า
+    const itemName = selectedOption ? selectedOption.text.split(' - ').pop() : ''; // ตัดเอาค่าอันสุดท้ายหลังเครื่องหมาย ' - '
 
-    document.addEventListener('DOMContentLoaded', function() {
-      <?php if ($success == 'item_removed'): ?>
-        Swal.fire({
-          title: 'นำของออกสต็อกสำเร็จ',
-          text: 'คุณจะถูกเปลี่ยนเส้นทางไปยังระบบหลัก',
-          icon: 'success',
-          timer: 1000,
-          timerProgressBar: true
-        }).then(function() {
-          window.location = 'mainsystem.php?username=' + encodeURIComponent('<?php echo htmlspecialchars($user['username']); ?>');
-        });
-      <?php endif; ?>
+    document.getElementById('item_id').value = itemId; // อัปเดต item_id
+    document.getElementById('item_name').value = itemName; // อัปเดต item_name
+});
 
-      <?php if (isset($_GET['error'])): ?>
-        const errorMessage = "<?php echo $_GET['error']; ?>";
-        Swal.fire({
-          title: 'เกิดข้อผิดพลาด',
-          text: errorMessage,
-          icon: 'error'
-        });
-      <?php endif; ?>
-    });
+
   </script>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
 </body>
