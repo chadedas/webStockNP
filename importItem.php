@@ -24,8 +24,9 @@ if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
 $itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 $success = isset($_GET['success']) ? $_GET['success'] : '';
-?>
 
+
+?>
 <!doctype html>
 <html lang="en">
 
@@ -54,8 +55,10 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
     }
   </style>
 </head>
-
+<?php include 'navbar.php'; ?>
 <body class="bg-light">
+
+
 
   <div class="container register">
     <div class="row">
@@ -152,6 +155,29 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(event) {
+      // ป้องกันการ submit แบบปกติ
+      event.preventDefault();
+
+      // แสดงการโหลดกลางหน้าจอ
+      Swal.fire({
+        title: 'กำลังดำเนินการ...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false, // ป้องกันการคลิกนอกหน้าต่าง
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // ใช้ setTimeout เพื่อจำลองการส่งข้อมูล
+      // เปลี่ยนเป็นการส่งข้อมูลจริงได้ในขั้นตอนต่อไป
+      setTimeout(() => {
+        // ส่งข้อมูลจริงไปยัง backend
+        form.submit(); // ส่งฟอร์มไปยัง backend
+      }, 1000); // ใส่เวลารอ 2 วินาทีเพื่อให้เห็นข้อความ loading
+    });
       const categorySelect = document.getElementById('category');
       const itemSelect = document.getElementById('item');
 
@@ -241,18 +267,37 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
             .catch(error => console.error('Error fetching item details:', error));
         }
       });
-      <?php if ($success == 'item_added'): ?>
-        Swal.fire({
-          title: 'นำของเข้าสต็อกสำเร็จ',
-          text: 'คุณจะถูกเปลี่ยนเส้นทางไปยังระบบหลัก',
-          icon: 'success',
-          timer: 1000,
-          timerProgressBar: true
-        }).then(function() {
-          window.location = 'mainsystem.php';
-        });
-      <?php endif; ?>
+      
+      document.getElementById('item').addEventListener('change', function () {
+    const selectedOption = this.selectedOptions[0];
+    const itemId = selectedOption ? selectedOption.value : ''; // ตรวจสอบว่ามีค่า
+    const itemName = selectedOption ? selectedOption.text.split(' - ').pop() : ''; // ตัดเอาค่าอันสุดท้ายหลังเครื่องหมาย ' - '
+
+    document.getElementById('item_id').value = itemId; // อัปเดต item_id
+    document.getElementById('item_name').value = itemName; // อัปเดต item_name
+});
     });
+    <?php if (isset($_GET['success']) && $_GET['success'] == 'item_added'): ?>
+    Swal.fire({
+      title: 'นำของเข้าสต็อกสำเร็จ',
+      text: 'คุณจะถูกเปลี่ยนเส้นทางไปยังระบบหลัก',
+      icon: 'success',
+      timer: 1000,
+      timerProgressBar: true
+    }).then(function() {
+      window.location = 'mainsystem.php';
+    });
+  <?php elseif (isset($_GET['error']) && $_GET['error'] == 'true'): ?>
+    Swal.fire({
+      title: 'ดำเนินการไม่สำเร็จ',
+      text: 'เกิดข้อผิดพลาดบางประการ',
+      icon: 'error',
+      timer: 1000,
+      timerProgressBar: true
+    }).then(function() {
+      // ไม่ต้องทำอะไรเพิ่มเติม หรือเปลี่ยนหน้า
+    });
+  <?php endif; ?>
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 

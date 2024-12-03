@@ -41,16 +41,16 @@ if (isset($_GET['search'])) {
     <link href="/docs/5.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-<!-- mangifie -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-title" content="N.P. Robotics">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <!-- mangifie -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-title" content="N.P. Robotics">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
     <!-- Favicons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="apple-touch-icon" href="image/NPPP-192x192.png">
-    
+
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
     <link rel="manifest" href="/docs/5.3/assets/img/favicons/manifest.json">
@@ -106,24 +106,6 @@ if (isset($_GET['search'])) {
         .bi {
             vertical-align: -.125em;
             fill: currentColor;
-        }
-
-        .nav-scroller {
-            position: relative;
-            z-index: 2;
-            height: 2.75rem;
-            overflow-y: hidden;
-        }
-
-        .nav-scroller .nav {
-            display: flex;
-            flex-wrap: nowrap;
-            padding-bottom: 1rem;
-            margin-top: -1px;
-            overflow-x: auto;
-            text-align: center;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
         }
 
         .btn-bd-primary {
@@ -189,19 +171,12 @@ if (isset($_GET['search'])) {
                 padding: 10px;
             }
 
-            .navbar {
-                transition: background-color 0.3s ease;
-            }
-
-            .sticky-top {
-                z-index: 1030;
-            }
-
         }
     </style>
 
 
 </head>
+<?php include 'navbar.php'; ?>
 
 <body>
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
@@ -228,42 +203,6 @@ if (isset($_GET['search'])) {
         </symbol>
     </svg>
 
-    <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-            <div class="container-fluid">
-                <a href="mainsystem.php" class="navbar-brand d-flex align-items-center">
-                    <img src="image/NPPP.png" alt="N.P. Robotics Logo" width="40" height="40" class="me-2">
-                    <strong>Stock N.P. Robotics</strong>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="importItem.php">เอาของเข้า</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="exportItem.php">เอาของออก</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="addnewuser.php">เพิ่มผู้ใช้ใหม่</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="history.php">ประวัติ</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="stock.php">สต็อก</a>
-                        </li>
-                    </ul>
-                    <span class="navbar-text me-3 text-white">
-                        <?php echo htmlspecialchars($user['firstname'] . ' ' . $user['surname']); ?>
-                    </span>
-                    <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
-                </div>
-            </div>
-        </nav>
-    </header>
 
 
 
@@ -288,7 +227,7 @@ if (isset($_GET['search'])) {
                             </div>
                         </a>
                     </div>
-                    
+
 
                     <div class="col text-center mx-auto">
                         <a href="exportItem.php">

@@ -1,0 +1,88 @@
+%YAML 1.1
+---
+# nproboti_stockwebapp.admin_logs
+-
+  id: 1
+  action: "??????????????"
+  username: "灲????"
+  action_date: "2024-12-03 15:15:20"
+  details: "????: 1 ???????????: Reed Switch, ?????: 1, ?????????: ???????? ???? (?????)"
+  ip_address: "124.122.90.43"
+-
+  id: 2
+  action: "นำของเข้าสต็อก"
+  username: "pranom"
+  action_date: "2024-12-03 15:16:42"
+  details: "ไอดี: 1 เพิ่มสินค้า: VR oculus quest 2 128GB, จำนวน: 1, ผู้นำเข้า: กฤษนันท์ อุดง (ชาร์จ)"
+  ip_address: "124.122.90.43"
+-
+  id: 3
+  action: "นำของออกสต็อก"
+  username: "pranom"
+  action_date: "2024-12-03 15:19:36"
+  details: "ไอดี: 1 เพิ่มสินค้า: Reed Switch, จำนวน: 1, ผู้นำเข้า: กฤษนันท์ อุดง (ชาร์จ)"
+  ip_address: "124.122.90.43"
+-
+  id: 4
+  action: "เพิ่มผู้ใช้ใหม่"
+  username: ""
+  action_date: "2024-12-03 15:28:08"
+  details: "ผู้เพิ่ม: , เพิ่มชื่อ: สุภารัตน์ ทองมาก (ข้าว)"
+  ip_address: "124.122.90.43"
+-
+  id: 5
+  action: "เพิ่มผู้ใช้ใหม่"
+  username: "pranom"
+  action_date: "2024-12-03 15:38:18"
+  details: "ผู้เพิ่ม: pranom, เพิ่มชื่อ: เทส เทส (เทส)"
+  ip_address: "124.122.90.43"
+-
+  id: 6
+  action: "แก้ไขข้อมูลในตาราง Stock_Main"
+  username: "pranom"
+  action_date: "2024-12-03 15:58:28"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '39', `status` = ''"
+  ip_address: "124.122.90.43"
+-
+  id: 7
+  action: "แก้ไขข้อมูลในตาราง"
+  username: "pranom"
+  action_date: "2024-12-03 15:59:14"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '38', `status` = ''"
+  ip_address: "124.122.90.43"
+-
+  id: 8
+  action: "แก้ไขข้อมูลในตาราง"
+  username: "pranom"
+  action_date: "2024-12-03 16:00:41"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '39', `status` = ''"
+  ip_address: "124.122.90.43"
+-
+  id: 9
+  action: "แก้ไขข้อมูลในตาราง"
+  username: "pranom"
+  action_date: "2024-12-03 16:01:30"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '38', `status` = 'active'"
+  ip_address: "124.122.90.43"
+-
+  id: 10
+  action: "แก้ไขข้อมูลในตาราง"
+  username: "pranom"
+  action_date: "2024-12-03 16:02:02"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '38', `status` = 'wait_test'"
+  ip_address: "124.122.90.43"
+-
+  id: 11
+  action: "แก้ไขข้อมูลในตาราง"
+  username: "pranom"
+  action_date: "2024-12-03 16:02:10"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: `Amount` = '38', `status` = 'active_notgood'"
+  ip_address: "124.122.90.43"
+-
+  id: 12
+  action: "แก้ไขข้อมูลในตาราง Stock_Main"
+  username: "pranom"
+  action_date: "2024-12-03 16:07:11"
+  details: "ผู้แก้ไข: pranom, แก้ไขข้อมูล ID: 1, ค่าใหม่: Amount = '38', status = ''"
+  ip_address: "124.122.90.43"
+...

@@ -10,6 +10,8 @@ if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
 
 // รับค่าชื่อผู้ใช้จาก session
 $username = $_SESSION['username'];
+$result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
+  $user = mysqli_fetch_assoc($result);
 ?>
 
 
@@ -40,6 +42,7 @@ $username = $_SESSION['username'];
 }
     </style>
 </head>
+<?php include 'navbar.php'; ?>
 <body>
     <div class="background-image"></div>
     <div class="container mt-4">

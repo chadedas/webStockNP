@@ -110,6 +110,19 @@ if (mysqli_num_rows($result) > 0) {
         }
     }
 
+    $ipAddress = $_SERVER['REMOTE_ADDR'];  // หรือจะใช้ method อื่นๆ สำหรับดึง IP
+
+    // สร้างข้อความ log
+    $action = "นำของออกสต็อก";
+    $details = "ไอดี: $itemID, เมนู: $category เพิ่มสินค้า: $item, จำนวน: $quantity, ผู้นำเข้า: $user";
+    $logQuery = "INSERT INTO admin_logs (action, username, details, ip_address,action_date) 
+             VALUES ('$action', '$username', '$details', '$ipAddress', '$dateImport')";
+
+    // บันทึกข้อมูลลงฐานข้อมูล
+    if (!mysqli_query($con, $logQuery)) {
+        die("Error logging action: " . mysqli_error($con));
+    }
+
     // สำเร็จ
     echo "DEBUG: Item successfully added.<br>";
     echo "DEBUG: Redirecting to exportItem.php<br>";

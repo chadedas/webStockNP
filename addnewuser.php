@@ -7,15 +7,22 @@ if (isset($_SESSION['username']) && $_SESSION['permission']) {
   if ($_SESSION['permission'] != 'admin') {
     header("Location: mainsystem.php");  // ส่งไปหน้า edituser_user.php
     exit;
+  }else{
+    $username = $_SESSION['username'];
+    $permission = $_SESSION['permission'];
+    $result = mysqli_query($con, "SELECT * FROM Employee WHERE username = '$username'");
+    $user = mysqli_fetch_assoc($result);
   }
 }
 $success = isset($_GET['success']) ? $_GET['success'] : '';
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 ?>
+
 <!doctype html>
 <html lang="en">
 
 <head>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Add User Information</title>
@@ -40,7 +47,7 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
     }
   </style>
 </head>
-
+<?php include 'navbar.php'; ?>
 <body class="bg-light">
 
   <div class="container register">
@@ -81,10 +88,33 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
       </div>
     </div>
   </div>
-
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(event) {
+      // ป้องกันการ submit แบบปกติ
+      event.preventDefault();
+
+      // แสดงการโหลดกลางหน้าจอ
+      Swal.fire({
+        title: 'กำลังดำเนินการ...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false, // ป้องกันการคลิกนอกหน้าต่าง
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      // ใช้ setTimeout เพื่อจำลองการส่งข้อมูล
+      // เปลี่ยนเป็นการส่งข้อมูลจริงได้ในขั้นตอนต่อไป
+      setTimeout(() => {
+        // ส่งข้อมูลจริงไปยัง backend
+        form.submit(); // ส่งฟอร์มไปยัง backend
+      }, 1000); // ใส่เวลารอ 2 วินาทีเพื่อให้เห็นข้อความ loading
+    });
       <?php if ($success == 'user_added'): ?>
         Swal.fire({
           title: 'เพิ่มข้อมูลสำเร็จ',

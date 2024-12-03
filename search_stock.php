@@ -8,6 +8,7 @@ if (!isset($_SESSION['username']) && !isset($_SESSION['permission'])) {
 }
 
 $username = $_SESSION['username'];
+$permission = $_SESSION['permission'];
 $search = isset($_POST['search']) ? $_POST['search'] : '';
 $table = isset($_POST['table']) ? $_POST['table'] : '';
 
@@ -15,66 +16,94 @@ if ($table) {
     if ($table === 'all') {
         // สำหรับ "ภาพรวม" ดึงข้อมูลจากทุกตาราง
         $tables = [
-            'Stock_Main' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
                             CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, 
                             whereItem AS เก็บไว้ที่ 
                             FROM Stock_Main 
                             WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, ProductName AS ชื่อ, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2' => "SELECT id, ItemName AS ชื่ออุปกรณ์, ProductName AS ชื่อ, Amount AS จำนวนคงเหลือ, 
                             CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, whereItem AS เก็บไว้ที่ 
                             FROM Stock_Main2 
                             WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Controller' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, NumDrive AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
+            'Stock_Main2_Controller' => "SELECT id, ItemName AS ชื่ออุปกรณ์, NumDrive AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
                                          whereItem AS เก็บไว้ที่, status AS สถานะ 
                                          FROM Stock_Main2_Controller WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_inroom' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2_inroom' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
                                      whereItem AS เก็บไว้ที่, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ 
                                      FROM Stock_Main2_inroom WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_KPS' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+            'Stock_Main2_KPS' => "SELECT id, ItemName AS ชื่ออุปกรณ์, CASE 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, whereItem AS เก็บไว้ที่ 
                                   FROM Stock_Main2_KPS WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Service' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, NumberItem AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
+            'Stock_Main2_Service' => "SELECT id, ItemName AS ชื่ออุปกรณ์, NumberItem AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
                                      company AS บริษัท, user AS ผู้นำออก, date AS วันที่ 
                                      FROM Stock_Main2_Service WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Study' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, list AS รายการ, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2_Study' => "SELECT id, ItemName AS ชื่ออุปกรณ์, list AS รายการ, Amount AS จำนวนคงเหลือ, 
                                     CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ, package AS ชุดที่ 
                                     FROM Stock_Main2_Study WHERE ItemName LIKE '%$search%'",
-            'Stock_Main3_Ppon' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, SerialNumber AS ซีเรียลนัมเบอร์, 
+            'Stock_Main3_Ppon' => "SELECT id, ItemName AS ชื่ออุปกรณ์, SerialNumber AS ซีเรียลนัมเบอร์, 
                                    whereItem AS เก็บไว้ที่, date AS วันที่, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ 
                                    FROM Stock_Main3_Ppon WHERE ItemName LIKE '%$search%'",
-            'Stock_Main4_VR' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+            'Stock_Main4_VR' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, CASE 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, 
                                  note AS หมายเหตุ, date AS วันที่ FROM Stock_Main4_VR WHERE ItemName LIKE '%$search%'"
@@ -114,27 +143,43 @@ if ($table) {
                 default:
                     $table_display_name = "ไม่ทราบแหล่งข้อมูล";
             }
-        
+
             // แสดงข้อความตามชื่อที่แปลงแล้ว
             echo "<h4>ข้อมูลจากตาราง: $table_display_name</h4>";
-            
+
             $result = mysqli_query($con, $query);
             if ($result) {
                 if (mysqli_num_rows($result) > 0) {
                     echo '<div class="table-responsive">';
                     echo '<table class="table table-bordered">';
                     echo '<thead><tr>';
+
+                    // ดึงชื่อคอลัมน์ทั้งหมด
                     $field_info = mysqli_fetch_fields($result);
                     foreach ($field_info as $val) {
                         echo "<th>" . $val->name . "</th>";
                     }
+                    echo "<th>Edit</th>"; // เพิ่มคอลัมน์สำหรับปุ่มแก้ไข
                     echo '</tr></thead>';
                     echo '<tbody>';
+
                     while ($row = mysqli_fetch_assoc($result)) {
                         echo "<tr>";
-                        foreach ($row as $column) {
-                            echo "<td>" . $column . "</td>";
+                        foreach ($row as $key => $column) {
+                            echo "<td>" . htmlspecialchars($column) . "</td>";
                         }
+
+                        // ตรวจสอบว่ากำลังแสดงข้อมูลจาก "ภาพรวม" หรือหมวดหมู่เฉพาะ
+                        $current_table = ($table === 'all') ? $table_name : $table;
+
+                        // เพิ่มปุ่มแก้ไขที่ลิงก์ไปยัง editItem.php
+                        echo '<td>';
+                        if (isset($row['id'])) { // ตรวจสอบว่ามีคอลัมน์ id
+                            echo '<a href="editItem.php?id=' . urlencode($row['id']) . '&table=' . urlencode($current_table) . '" class="btn btn-warning btn-sm">แก้ไข</a>';
+                        } else {
+                            echo 'ไม่มี ID';
+                        }
+                        echo '</td>';
                         echo "</tr>";
                     }
                     echo '</tbody>';
@@ -150,66 +195,94 @@ if ($table) {
     } else {
         // ถ้าคุณเลือกตารางเฉพาะ
         $queries = [
-            'Stock_Main' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
                             CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, 
                             whereItem AS เก็บไว้ที่ 
                             FROM Stock_Main 
                             WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, ProductName AS ชื่อ, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2' => "SELECT id, ItemName AS ชื่ออุปกรณ์, ProductName AS ชื่อ, Amount AS จำนวนคงเหลือ, 
                             CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, whereItem AS เก็บไว้ที่ 
                             FROM Stock_Main2 
                             WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Controller' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, NumDrive AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
+            'Stock_Main2_Controller' => "SELECT id, ItemName AS ชื่ออุปกรณ์, NumDrive AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
                                          whereItem AS เก็บไว้ที่, status AS สถานะ 
                                          FROM Stock_Main2_Controller WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_inroom' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2_inroom' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, 
                                      whereItem AS เก็บไว้ที่, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ 
                                      FROM Stock_Main2_inroom WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_KPS' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+            'Stock_Main2_KPS' => "SELECT id, ItemName AS ชื่ออุปกรณ์, CASE 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, whereItem AS เก็บไว้ที่ 
                                   FROM Stock_Main2_KPS WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Service' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, NumberItem AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
+            'Stock_Main2_Service' => "SELECT id, ItemName AS ชื่ออุปกรณ์, NumberItem AS เลขอุปกรณ์, NumNP AS เลขบริษัท, 
                                      company AS บริษัท, user AS ผู้นำออก, date AS วันที่ 
                                      FROM Stock_Main2_Service WHERE ItemName LIKE '%$search%'",
-            'Stock_Main2_Study' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, list AS รายการ, Amount AS จำนวนคงเหลือ, 
+            'Stock_Main2_Study' => "SELECT id, ItemName AS ชื่ออุปกรณ์, list AS รายการ, Amount AS จำนวนคงเหลือ, 
                                     CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ, package AS ชุดที่ 
                                     FROM Stock_Main2_Study WHERE ItemName LIKE '%$search%'",
-            'Stock_Main3_Ppon' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, SerialNumber AS ซีเรียลนัมเบอร์, 
+            'Stock_Main3_Ppon' => "SELECT id, ItemName AS ชื่ออุปกรณ์, SerialNumber AS ซีเรียลนัมเบอร์, 
                                    whereItem AS เก็บไว้ที่, date AS วันที่, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, note AS หมายเหตุ 
                                    FROM Stock_Main3_Ppon WHERE ItemName LIKE '%$search%'",
-            'Stock_Main4_VR' => "SELECT id AS ลำดับ, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, CASE 
-                                WHEN status IS NULL THEN 'สถานะไม่ระบุ' 
-                                WHEN status = 'active' THEN '✅' 
-                                WHEN status = 'not_active' THEN '❌' 
+            'Stock_Main4_VR' => "SELECT id, ItemName AS ชื่ออุปกรณ์, Amount AS จำนวนคงเหลือ, CASE 
+                                WHEN status IS NULL OR status = '' THEN 'ไม่ระบุ ❔' 
+    WHEN status = 'active' THEN 'ปกติ ✅'
+    WHEN status = 'active_notgood' THEN 'ปกติแต่ไม่ดี 🟨'
+    WHEN status = 'wait_test' THEN 'รอเทส 🔵'
+    WHEN status = 'not_active' THEN 'เสีย ❌'
+    WHEN status = 'wait' THEN 'รอซ่อม 🟡'
+    WHEN status = 'repairing' THEN 'กำลังซ่อม 🟤' 
                                 ELSE status 
                             END AS สถานะ, 
                                  note AS หมายเหตุ, date AS วันที่ FROM Stock_Main4_VR WHERE ItemName LIKE '%$search%'"
@@ -259,17 +332,33 @@ if ($table) {
                 echo '<div class="table-responsive">';
                 echo '<table class="table table-bordered">';
                 echo '<thead><tr>';
+
+                // ดึงชื่อคอลัมน์ทั้งหมด
                 $field_info = mysqli_fetch_fields($result);
                 foreach ($field_info as $val) {
                     echo "<th>" . $val->name . "</th>";
                 }
+                echo "<th>Edit</th>"; // เพิ่มคอลัมน์สำหรับปุ่มแก้ไข
                 echo '</tr></thead>';
                 echo '<tbody>';
+
                 while ($row = mysqli_fetch_assoc($result)) {
                     echo "<tr>";
-                    foreach ($row as $column) {
-                        echo "<td>" . $column . "</td>";
+                    foreach ($row as $key => $column) {
+                        echo "<td>" . htmlspecialchars($column) . "</td>";
                     }
+
+                    // ตรวจสอบว่ากำลังแสดงข้อมูลจาก "ภาพรวม" หรือหมวดหมู่เฉพาะ
+                    $current_table = ($table === 'all') ? $table_name : $table;
+
+                    // เพิ่มปุ่มแก้ไขที่ลิงก์ไปยัง editItem.php
+                    echo '<td>';
+                    if (isset($row['id'])) { // ตรวจสอบว่ามีคอลัมน์ id
+                        echo '<a href="editItem.php?id=' . urlencode($row['id']) . '&table=' . urlencode($current_table) . '" class="btn btn-warning btn-sm">แก้ไข</a>';
+                    } else {
+                        echo 'ไม่มี ID';
+                    }
+                    echo '</td>';
                     echo "</tr>";
                 }
                 echo '</tbody>';
@@ -285,4 +374,3 @@ if ($table) {
 } else {
     echo "<p>กรุณาเลือกตารางที่ต้องการค้นหา</p>";
 }
-?>
