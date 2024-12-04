@@ -30,6 +30,13 @@ if ($row && password_verify($password, $row['password'])) {
     // ตรวจสอบสิทธิ์
     if ($row['permission'] == 'admin') {
         echo "
+        <link href='https://fonts.googleapis.com/css2?family=Kanit:wght@500&display=swap' rel='stylesheet'>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      scroll-behavior: smooth;
+    }
+    </style>
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -46,6 +53,13 @@ if ($row && password_verify($password, $row['password'])) {
         </script>";
     } elseif ($row['permission'] == 'user') {
         echo "
+        <link href='https://fonts.googleapis.com/css2?family=Kanit:wght@500&display=swap' rel='stylesheet'>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      scroll-behavior: smooth;
+    }
+    </style>
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
