@@ -25,7 +25,12 @@ if (isset($_GET['category'])) {
     }
   } elseif (in_array($category, $allowedTables)) {
     // ดึงข้อมูลเฉพาะตารางที่เลือก
-    $query = "SELECT id, ItemName FROM $category";
+    if($category === "Stock_Main2_Study"){
+        $query = "SELECT id, ItemName, list FROM $category";
+    }else{
+        $query = "SELECT id, ItemName FROM $category";
+    }
+    
   } else {
     // กรณีหมวดหมู่ไม่ถูกต้อง
     echo json_encode(['error' => 'Invalid category']);

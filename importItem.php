@@ -68,7 +68,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
         <p>สำหรับแสดงข้อมูลผู้ใช้โปรแกรมถอดประกอบ KR150</p>
       </div>
       <div class="col-md-9 register-right">
-        <h3 class="register-heading">กรอกฟอร์ม</h3>
+        <h3 class="register-heading">เอาของเข้า</h3>
         <form action="importItem_backend.php" method="post" enctype="multipart/form-data">
           <div class="row register-form">
             <div class="col-md-6">
@@ -76,7 +76,6 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                 <label for="firstname" class="form-label">โดยผู้ดูแลสต็อก</label>
                 <input type="text" name="firstname" id="firstname" class="form-control" value="<?php echo htmlspecialchars($user['firstname'] . ' ' . $user['surname']); ?>" readonly required />
               </div>
-
               <div class="form-group">
                 <label for="user" class="form-label">ผู้นำเข้า</label>
                 <select name="user" id="user" class="form-control" required>
@@ -181,33 +180,43 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
       const categorySelect = document.getElementById('category');
       const itemSelect = document.getElementById('item');
 
-      categorySelect.addEventListener('change', function() {
-        const selectedCategory = categorySelect.value;
+      categorySelect.addEventListener('change', function () {
+    const selectedCategory = categorySelect.value;
 
-        if (selectedCategory) {
-          fetch(`getItemQuantity.php?category=${selectedCategory}`)
+    if (selectedCategory) {
+        fetch(`getItemQuantity.php?category=${selectedCategory}`)
             .then(response => response.json())
             .then(data => {
-              itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
+                itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
 
-              if (data.error) {
-                console.error(data.error);
-                alert('เกิดข้อผิดพลาด: ' + data.error);
-              } else {
-                data.forEach(item => {
-                  const option = document.createElement('option');
-                  option.value = item.id; // กำหนดให้ value ของ option เป็น id
-                  option.textContent = `${item.id} - ${item.ItemName}`;
-                  itemSelect.appendChild(option);
-                });
-              }
+                if (data.error) {
+                    console.error(data.error);
+                    alert('เกิดข้อผิดพลาด: ' + data.error);
+                } else {
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        // ตรวจสอบว่า key มีอยู่ใน object ก่อน
+                        const id = item.id || 'ID';
+                        const name = item.ItemName;
+
+                        option.value = id; // กำหนดให้ value เป็น id
+                        if(selectedCategory === "Stock_Main2_Study"){
+                          const list = item.list;
+                          option.textContent = `${id} - ${name} - ${list}`; // แสดงข้อมูล id และชื่อ
+                        }else{
+                          option.textContent = `${id} - ${name}`; // แสดงข้อมูล id และชื่อ
+                        }
+                        
+                        itemSelect.appendChild(option);
+                    });
+                }
             })
             .catch(error => {
-              console.error('Error fetching items:', error);
-              alert('ไม่สามารถดึงข้อมูลสินค้าได้');
+                console.error('Error fetching items:', error);
+                alert('ไม่สามารถดึงข้อมูลสินค้าได้');
             });
-        }
-      });
+    }
+});
 
       itemSelect.addEventListener('change', function() {
         const selectedItem = itemSelect.selectedOptions[0];
@@ -227,7 +236,7 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
           case 'Stock_Main2_Study':
             categoryName = 'ห้องสแปร์ (ในห้อง)';
             break;
-          case 'ชุดวีอา VR':
+          case 'Stock_Main4_VR':
             categoryName = 'ห้องประชุม';
             break;
             // เพิ่มกรณีอื่นๆ ที่ต้องการ
@@ -237,34 +246,39 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
 
         if (selectedItem) {
           const itemId = selectedItem.value;
-          const itemName = selectedItem.textContent.split(' - ')[1];
+          if (selectedCategory === "Stock_Main2_Study"){
+            const itemName = selectedItem.textContent.split(' - ')[1];
+          }else{
+            const itemName = selectedItem.textContent.split(' - ')[1];
+          }
+          
 
           // Make an AJAX call to get the item's details
-          fetch(`getItemDetails.php?id=${itemId}`)
-            .then(response => response.json())
-            .then(data => {
-              if (data) {
-                Swal.fire({
-                  title: `รายละเอียดของ ${itemName}`,
-                  html: `
-              <table class="table">
-                <tr><th>เก็บในห้อง</th><td>${categoryName}</td></tr>
-                <tr><th>นำไปเก็บที่</th><td>${data.whereItem}</td></tr>
-                <tr><th>ชื่อของ</th><td>${data.ItemName}</td></tr>
-              </table>
-            `,
-                  showClass: {
+          fetch(`getItemDetails.php?id=${itemId}&category=${selectedCategory}`) // ใช้ & แทน ? สำหรับพารามิเตอร์ตัวที่สอง
+    .then(response => response.json())
+    .then(data => {
+        if (!data.error) {
+            Swal.fire({
+                title: `รายละเอียดของ ${data.ItemName}`,
+                html: `
+                    <table class="table">
+                        <tr><th>เก็บในห้อง</th><td>${categoryName}</td></tr>
+                        <tr><th>ไปเอาได้ที่</th><td>${data.whereItem || '${categoryName}'}</td></tr>
+                        <tr><th>ชื่อของ</th><td>${data.ItemName}</td></tr>
+                    </table>
+                `,
+                showClass: {
                     popup: `animate__animated animate__fadeInUp animate__faster`
-                  },
-                  hideClass: {
+                },
+                hideClass: {
                     popup: `animate__animated animate__fadeOutDown animate__faster`
-                  }
-                });
-              } else {
-                alert('ข้อมูลไม่พบ');
-              }
-            })
-            .catch(error => console.error('Error fetching item details:', error));
+                }
+            });
+        } else {
+            Swal.fire('ข้อมูลไม่พบ', data.error, 'error');
+        }
+    })
+    .catch(error => console.error('Error fetching item details:', error));
         }
       });
       
