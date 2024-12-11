@@ -20,8 +20,6 @@ if (isset($_SESSION['username']) && isset($_SESSION['permission'])) {
   header("Location: logout.php");
   exit;
 }
-
-$itemQuery = mysqli_query($con, "SELECT id, ItemName FROM Stock_Main");
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 $success = isset($_GET['success']) ? $_GET['success'] : '';
 
@@ -184,37 +182,47 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
     const selectedCategory = categorySelect.value;
 
     if (selectedCategory) {
-        fetch(`getItemQuantity.php?category=${selectedCategory}`)
-            .then(response => response.json())
-            .then(data => {
-                itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
+      fetch(`getItemQuantity.php?category=${selectedCategory}`)
+    .then(response => response.json())
+    .then(data => {
+        itemSelect.innerHTML = `<option value="" disabled selected>เลือกของที่จะนำเข้า</option>`;
 
-                if (data.error) {
-                    console.error(data.error);
-                    alert('เกิดข้อผิดพลาด: ' + data.error);
-                } else {
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        // ตรวจสอบว่า key มีอยู่ใน object ก่อน
-                        const id = item.id || 'ID';
-                        const name = item.ItemName;
+        if (data.error) {
+            console.error(data.error);
+            alert('เกิดข้อผิดพลาด: ' + data.error);
+        } else {
+            if (selectedCategory === "Stock_Main2_Study") {
+                const predefinedItems = [
+                    { id: 1, name: "ชุดอบรม KUKA 1" },
+                    { id: 2, name: "ชุดอบรม KUKA 2" },
+                    { id: 3, name: "ชุดอบรม ABB 1" },
+                    { id: 4, name: "ชุดอบรม ABB 2" }
+                ];
 
-                        option.value = id; // กำหนดให้ value เป็น id
-                        if(selectedCategory === "Stock_Main2_Study"){
-                          const list = item.list;
-                          option.textContent = `${id} - ${name} - ${list}`; // แสดงข้อมูล id และชื่อ
-                        }else{
-                          option.textContent = `${id} - ${name}`; // แสดงข้อมูล id และชื่อ
-                        }
-                        
-                        itemSelect.appendChild(option);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching items:', error);
-                alert('ไม่สามารถดึงข้อมูลสินค้าได้');
-            });
+                predefinedItems.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.id} - ${item.name}`;
+                    itemSelect.appendChild(option);
+                });
+            } else {
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    const id = item.id || 'ID';
+                    const name = item.ItemName || 'No Name';
+
+                    option.value = id;
+                    option.textContent = `${id} - ${name}`;
+                    itemSelect.appendChild(option);
+                });
+            }
+        }
+    })
+    .catch(error => {
+        console.error('เกิดข้อผิดพลาด:', error);
+        alert('ไม่สามารถดึงข้อมูลได้');
+    });
+
     }
 });
 
@@ -258,13 +266,14 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
     .then(response => response.json())
     .then(data => {
         if (!data.error) {
+          if(selectedCategory != "Stock_Main2_Study"){
             Swal.fire({
                 title: `รายละเอียดของ ${data.ItemName}`,
                 html: `
                     <table class="table">
                         <tr><th>เก็บในห้อง</th><td>${categoryName}</td></tr>
-                        <tr><th>ไปเอาได้ที่</th><td>${data.whereItem || '${categoryName}'}</td></tr>
-                        <tr><th>ชื่อของ</th><td>${data.ItemName}</td></tr>
+                        <tr><th>ไปเอาได้ที่</th><td>${data.whereItem || categoryName}</td></tr>
+                        <tr><th>ชื่อของ</th><td>${data.list || data.ItemName}</td></tr>
                     </table>
                 `,
                 showClass: {
@@ -274,7 +283,9 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
                     popup: `animate__animated animate__fadeOutDown animate__faster`
                 }
             });
-        } else {
+          }
+        }
+        else {
             Swal.fire('ข้อมูลไม่พบ', data.error, 'error');
         }
     })

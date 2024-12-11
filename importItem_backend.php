@@ -41,6 +41,23 @@ $quantity = intval($_POST['quantity']); // แปลงเป็นจำนว�
 $dateImport = mysqli_real_escape_string($con, $_POST['date_added']);
 
 // ตรวจสอบจำนวนสินค้าที่มีในสต็อก
+if($category == "Stock_Main2_Study"){
+    if($itemID == 1){
+        $package = 1;
+        $itemID = 1;
+    }elseif($itemID == 2){
+        $package = 2;
+        $itemID = 21;
+    }
+    elseif($itemID == 3){
+        $package = 3;
+        $itemID = 29;
+    }
+    elseif($itemID == 4){
+        $package = 4;
+        $itemID = 48;
+    }
+}
 $query = "SELECT Amount FROM `$category` WHERE id = '$itemID'"; // ใช้ backticks สำหรับ table name
 $result = mysqli_query($con, $query);
 if (!$result) {
@@ -54,17 +71,50 @@ if (mysqli_num_rows($result) > 0) {
     $newAmount = $currentAmount + $quantity;
 
     // อัปเดตจำนวนในสต็อก
-    $updateQuery = "UPDATE `$category` SET Amount = '$newAmount' WHERE id = '$itemID'"; // ใช้ backticks สำหรับ table name
+    if($category == "Stock_Main2_Study"){
+        $updateQuery = "UPDATE `$category` SET Amount = '$newAmount' WHERE package = '$package'";
+    }else{
+        $updateQuery = "UPDATE `$category` SET Amount = '$newAmount' WHERE id = '$itemID'";
+    }
+     // ใช้ backticks สำหรับ table name
     if (!mysqli_query($con, $updateQuery)) {
         die("Error in UPDATE query: " . mysqli_error($con));
     }
 
     // บันทึกข้อมูลการนำออกใน Stock_Import
-    $insertQuery = "INSERT INTO Stock_Import (username, user , ItemName, Amount, Date) 
-                        VALUES ('$username', '$user' , '$item', '$quantity', '$dateImport')";
-    if (!mysqli_query($con, $insertQuery)) {
-        die("Error in INSERT query: " . mysqli_error($con));
+  // Define $insertQuery to avoid undefined warnings
+// กำหนดค่าเริ่มต้นสำหรับ $insertQuery
+$insertQuery = ""; 
+
+if ($category == "Stock_Main2_Study") {
+    if ($package == 1) {
+        $insertQuery = "INSERT INTO Stock_Import (username, user, ItemName, Amount, Date) 
+                        VALUES ('$username', '$user', 'ชุดอบรม KUKA 1', '$quantity', '$dateImport')";
+    } elseif ($package == 2) {
+        $insertQuery = "INSERT INTO Stock_Import (username, user, ItemName, Amount, Date) 
+                        VALUES ('$username', '$user', 'ชุดอบรม KUKA 2', '$quantity', '$dateImport')";
+    } elseif ($package == 3) {
+        $insertQuery = "INSERT INTO Stock_Import (username, user, ItemName, Amount, Date) 
+                        VALUES ('$username', '$user', 'ชุดอบรม ABB 1', '$quantity', '$dateImport')";
+    } elseif ($package == 4) {
+        $insertQuery = "INSERT INTO Stock_Import (username, user, ItemName, Amount, Date) 
+                        VALUES ('$username', '$user', 'ชุดอบรม ABB 2', '$quantity', '$dateImport')";
     }
+} else {
+    $insertQuery = "INSERT INTO Stock_Import (username, user, ItemName, Amount, Date) 
+                    VALUES ('$username', '$user', '$item', '$quantity', '$dateImport')";
+}
+
+// ตรวจสอบว่าคำสั่ง INSERT ถูกตั้งค่าไว้หรือไม่
+if (empty($insertQuery)) {
+    die("คำสั่ง SQL สำหรับการ INSERT ไม่ถูกต้อง โปรดตรวจสอบข้อมูลที่ป้อนเข้าไป");
+}
+
+// ดำเนินการคำสั่ง INSERT
+if (!mysqli_query($con, $insertQuery)) {
+    die("เกิดข้อผิดพลาดในการดำเนินการคำสั่ง INSERT: " . mysqli_error($con));
+}
+
 
     // จัดการอัพโหลดรูปภาพ
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
